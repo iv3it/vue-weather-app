@@ -23,33 +23,37 @@
         </form>
       </section>
 
-      <section class="main" v-if="cityData">
-        <h1 class="main__city">{{ cityName }}</h1>
-        <h2 class="main__condition">{{ cityData.current.weather[0].main }}</h2>
-        <img src="../assets/icons/cloud-fog.svg" class="main__icon"/>
-        <h3 class="main__temp">{{ currentTemp }}&#176;</h3>
-        <p class="main__additional">
-          <span class="pe-3">
-            <img src="../assets/icons/drop-humidity.svg" class="main__icon--xs"/>
-            {{ cityData.current.humidity }} %
-          </span>
-          <span>
-            <img src="../assets/icons/wind.svg" class="main__icon--xs"/>
-            {{ currentWindSpeed }} km/h
-          </span>
-        </p>
-      </section>
+      <transition name="fade" appear>
+        <section class="main" v-if="cityData">
+          <h1 class="main__city">{{ cityName }}</h1>
+          <h2 class="main__condition">{{ cityData.current.weather[0].main }}</h2>
+          <img src="../assets/icons/cloud-fog.svg" class="main__icon"/>
+          <h3 class="main__temp">{{ currentTemp }}&#176;</h3>
+          <p class="main__additional">
+            <span class="pe-3">
+              <img src="../assets/icons/drop-humidity.svg" class="main__icon--xs"/>
+              {{ cityData.current.humidity }} %
+            </span>
+            <span>
+              <img src="../assets/icons/wind.svg" class="main__icon--xs"/>
+              {{ currentWindSpeed }} km/h
+            </span>
+          </p>
+        </section>
+      </transition>
 
-      <section class="nextDays" v-if="cityData">
-        <h4 class="nextDays__title">Next days</h4>
-        <div class="nextDays__holder">
-          <div class="container p-0">
-            <div class="row flex-nowrap">
-              <NextDay :nextDays="nextDays"/>
+      <transition name="fade" appear>
+        <section class="nextDays" v-if="cityData">
+          <h4 class="nextDays__title">Next days</h4>
+          <div class="nextDays__holder">
+            <div class="container p-0">
+              <div class="row flex-nowrap">
+                <NextDay :nextDays="nextDays"/>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </transition>
 
     </div>
   </div>
@@ -282,4 +286,21 @@ export default {
   }
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.4s ease-in-out;
+}
+
+.fade-enter-from {
+  transform: translateY(10px);
+}
+
+.fade-enter-to {
+  transform: translateY(0);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
