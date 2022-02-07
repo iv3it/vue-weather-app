@@ -162,6 +162,10 @@ export default {
     &::placeholder {
       opacity: 0.7;
     }
+
+    &::-webkit-input-placeholder {
+      color: $white;
+    }
   }
 
   &__search {
