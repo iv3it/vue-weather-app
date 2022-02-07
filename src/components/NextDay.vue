@@ -1,5 +1,5 @@
 <template>
-  <div class="col-3 col-xl-2" v-for="(nextDay, index) in nextDays" :key="index">
+  <div class="col-sm-3 col-4" v-for="(nextDay, index) in nextDays" :key="index">
     <div class="box">
       <p class="box__day">{{ nextDay.dayname }}</p>
       <img src="../assets/icons/cloud-fog.svg" class="box__icon"/>
@@ -37,6 +37,7 @@ export default {
   flex-direction: column;
   align-items: center;
   color: $white;
+  height: 100%;
 
   &__day {
     font-size: 0.8rem;
@@ -56,6 +57,15 @@ export default {
     &--night {
       color: $darkGrey;
       padding-left: 0.3rem;
+
+      @media (max-width: 575px) {
+        padding-left: 0;
+      }
+    }
+
+    @media (max-width: 575px) {
+      display: flex;
+      flex-direction: column;
     }
   }
 }
