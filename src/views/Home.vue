@@ -18,7 +18,7 @@
             </div>
           </div>
           <button class="searchBar__search" type="submit">
-            <img src="../assets/icons/search-line.svg" class="searchBar__icon" />
+            <img :src="`${env.publicPath}assets/icons/search-line.svg`" class="searchBar__icon" />
           </button>
         </form>
       </section>
@@ -27,15 +27,15 @@
         <section class="main" v-if="cityData">
           <h1 class="main__city">{{ cityName }}</h1>
           <h2 class="main__condition">{{ cityData.current.weather[0].main }}</h2>
-          <img src="../assets/icons/cloud-fog.svg" class="main__icon"/>
+          <img :src="`${env.publicPath}assets/icons/${cityData.weatherIcon}.svg`" class="main__icon"/>
           <h3 class="main__temp">{{ currentTemp }}&#176;</h3>
           <p class="main__additional">
             <span class="pe-3">
-              <img src="../assets/icons/drop-humidity.svg" class="main__icon--xs"/>
+              <img :src="`${env.publicPath}assets/icons/drop-humidity.svg`" class="main__icon--xs"/>
               {{ cityData.current.humidity }} %
             </span>
             <span>
-              <img src="../assets/icons/wind.svg" class="main__icon--xs"/>
+              <img :src="`${env.publicPath}assets/icons/wind.svg`" class="main__icon--xs"/>
               {{ currentWindSpeed }} km/h
             </span>
           </p>
@@ -63,6 +63,7 @@
 import env from '../env.js'
 import { computed, ref } from 'vue'
 import NextDay from '../components/NextDay.vue'
+import { getWeatherIcon } from '../weatherIcon'
 
 export default {
   name: 'Home',
@@ -94,14 +95,21 @@ export default {
 
     let cityName = ref();
     let cityData = ref();
-    function getCityData(city) {
+    async function getCityData(city) {
       let cityLat = city.lat;
       let cityLon = city.lon;
       cityName.value = city.name;
 
-      fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${cityLat}&lon=${cityLon}&units=metric&appid=${env.apiKey}`)
+      await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${cityLat}&lon=${cityLon}&units=metric&appid=${env.apiKey}`)
       .then(response => response.json())
       .then(data => cityData.value = data);
+
+      let weatherCode = cityData.value.current.weather[0].id;
+      let timezoneOffset = cityData.value.timezone_offset;
+      let sunsetTime = cityData.value.current.sunset + timezoneOffset;
+      let currentTime = cityData.value.current.dt + timezoneOffset;
+      
+      cityData.value.weatherIcon = getWeatherIcon(true, weatherCode, sunsetTime, currentTime);
 
       isVisible.value = false;
     }
@@ -114,13 +122,16 @@ export default {
         element.temp.day = Math.round(element.temp.day)
         element.temp.night = Math.round(element.temp.night)
         element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
+
+        let weatherCode = element.weather[0].id;
+        element.weatherIcon = getWeatherIcon(false, weatherCode, element.sunset, undefined);
       });
       
       return cityData.value.daily.slice(1, 7)
     });
     
     return {
-      city, findCities, citiesFound, getCityData, cityData, isVisible, cityName, currentTemp, currentWindSpeed, nextDays
+      city, findCities, citiesFound, getCityData, cityData, isVisible, cityName, currentTemp, currentWindSpeed, nextDays, env
     }
   }
 }

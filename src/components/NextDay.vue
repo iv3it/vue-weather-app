@@ -2,13 +2,14 @@
   <div class="col-sm-3 col-4" v-for="(nextDay, index) in nextDays" :key="index">
     <div class="box">
       <p class="box__day">{{ nextDay.dayname }}</p>
-      <img src="../assets/icons/cloud-fog.svg" class="box__icon"/>
+      <img :src="`${env.publicPath}assets/icons/${nextDay.weatherIcon}.svg`" class="box__icon"/>
       <p class="box__temp">{{ nextDay.temp.day }}&#176; <span class="box__temp box__temp--night">{{ nextDay.temp.night }}&#176;</span></p>
     </div>
   </div>
 </template>
 
 <script>
+import env from '../env.js'
 import { toRef } from 'vue';
 
 export default {
@@ -20,7 +21,7 @@ export default {
     let nextDays = toRef(props, 'nextDays');
 
     return {
-      nextDays,
+      nextDays, env
     }
   }
 }
