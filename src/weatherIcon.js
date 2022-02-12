@@ -62,7 +62,7 @@ let weatherCodeToIcon = {
   804: ["04"],
 }
 
-export function getWeatherIcon(isCurrent, weatherCode, sunsetTime, currentTime) {
+export function getWeatherIcon(isCurrent, weatherCode, sunsetTime, currentTime, sunriseTime) {
   let fallbackIcon = "03";
 
   if(!weatherCodeToIcon.hasOwnProperty(weatherCode)) {
@@ -71,7 +71,7 @@ export function getWeatherIcon(isCurrent, weatherCode, sunsetTime, currentTime) 
 
   let weatherIconIndex = 0;
   
-  if((isCurrent && currentTime > sunsetTime) && weatherCodeToIcon[weatherCode].length > 1) {
+  if(isCurrent && (currentTime < sunriseTime || currentTime > sunsetTime) && weatherCodeToIcon[weatherCode].length > 1) {
     weatherIconIndex = 1;
   }
   

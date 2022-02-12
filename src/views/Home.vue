@@ -106,10 +106,11 @@ export default {
 
       let weatherCode = cityData.value.current.weather[0].id;
       let timezoneOffset = cityData.value.timezone_offset;
+      let sunriseTime = cityData.value.current.sunrise + timezoneOffset;
       let sunsetTime = cityData.value.current.sunset + timezoneOffset;
       let currentTime = cityData.value.current.dt + timezoneOffset;
       
-      cityData.value.weatherIcon = getWeatherIcon(true, weatherCode, sunsetTime, currentTime);
+      cityData.value.weatherIcon = getWeatherIcon(true, weatherCode, sunsetTime, currentTime, sunriseTime);
 
       isVisible.value = false;
     }
@@ -124,7 +125,7 @@ export default {
         element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
 
         let weatherCode = element.weather[0].id;
-        element.weatherIcon = getWeatherIcon(false, weatherCode, element.sunset, undefined);
+        element.weatherIcon = getWeatherIcon(false, weatherCode, element.sunset, undefined, undefined);
       });
       
       return cityData.value.daily.slice(1, 7)
