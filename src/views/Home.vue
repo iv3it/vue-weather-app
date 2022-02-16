@@ -46,7 +46,8 @@
         <section class="nextDays" v-if="cityData">
           <h4 class="nextDays__title">Next days</h4>
           <div class="nextDays__holder">
-            <div class="container p-0">
+            <TemperatureChart :nextDays="nextDays"/>
+            <div class="nextDays__container container">
               <div class="row flex-nowrap">
                 <NextDay :nextDays="nextDays"/>
               </div>
@@ -63,12 +64,14 @@
 import env from '../env.js'
 import { computed, ref } from 'vue'
 import NextDay from '../components/NextDay.vue'
+import TemperatureChart from '../components/TemperatureChart.vue'
 import { getWeatherIcon } from '../weatherIcon'
 
 export default {
   name: 'Home',
   components: {
     NextDay,
+    TemperatureChart
   },
   setup() {
     let city = {
@@ -260,7 +263,7 @@ export default {
   }
 
   &__icon {
-    width: 9rem;
+    height: 5.5rem;
     margin: 3rem 0;
 
     &--xs {
@@ -276,6 +279,12 @@ export default {
 
 .nextDays {
   padding-bottom: 3rem;
+
+  &__container {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding: 2rem 0;
+  }
 
   &__title {
     font-size: 0.9rem;
@@ -298,7 +307,7 @@ export default {
     position: relative;
     overflow-y: auto;
     scrollbar-width: thin;
-    padding: 2rem 0;
+    padding: 0 0 2rem 0;
   }
 }
 
