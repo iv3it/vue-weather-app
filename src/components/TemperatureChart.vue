@@ -16,14 +16,14 @@ export default {
     LineChart,
   },
   props: {
-    nextDays: Object,
+    cityData: Object,
   },
   setup(props) {
-    let nextDays = toRef(props, 'nextDays');
+    let cityData = toRef(props, 'cityData');
 
-    let chartTemperatures = computed(() => nextDays.value.map(a => Math.round(a.temp.day)));
+    let chartTemperatures = computed(() => cityData.value.daily.map(a => Math.round(a.temp.day)).slice(1, 7));
 
-    let chartDays = computed(() => nextDays.value.map(a => new Date(a.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })));
+    let chartDays = computed(() => cityData.value.daily.map(a => new Date(a.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })).slice(1, 7));
 
     let optionsChart = ref({
       responsive: true,

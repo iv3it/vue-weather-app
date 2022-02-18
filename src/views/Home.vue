@@ -46,10 +46,10 @@
         <section class="nextDays" v-if="cityData">
           <h4 class="nextDays__title">Next days</h4>
           <div class="nextDays__holder">
-            <TemperatureChart :nextDays="nextDays"/>
+            <TemperatureChart :cityData="cityData"/>
             <div class="nextDays__container container">
               <div class="row flex-nowrap">
-                <NextDay :nextDays="nextDays"/>
+                <NextDay :cityData="cityData"/>
               </div>
             </div>
           </div>
@@ -120,22 +120,9 @@ export default {
 
     let currentTemp = computed(() => Math.round(cityData.value.current.temp));
     let currentWindSpeed = computed(() => Math.round(cityData.value.current.wind_speed * 3.6));
-
-    let nextDays = computed(() => {
-      cityData.value.daily.forEach(element => {
-        element.temp.day = Math.round(element.temp.day)
-        element.temp.night = Math.round(element.temp.night)
-        element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
-
-        let weatherCode = element.weather[0].id;
-        element.weatherIcon = getWeatherIcon(false, weatherCode, element.sunset, undefined, undefined);
-      });
-      
-      return cityData.value.daily.slice(1, 7)
-    });
     
     return {
-      city, findCities, citiesFound, getCityData, cityData, isVisible, cityName, currentTemp, currentWindSpeed, nextDays, env
+      city, findCities, citiesFound, getCityData, cityData, isVisible, cityName, currentTemp, currentWindSpeed, env,
     }
   }
 }

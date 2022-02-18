@@ -10,18 +10,37 @@
 
 <script>
 import env from '../env.js'
-import { toRef } from 'vue';
+import { toRef, computed } from 'vue';
+import { getWeatherIcon } from '../weatherIcon'
 
 export default {
   name: 'NextDay',
   props: {
-    nextDays: Object,
+    cityData: Object,
   },
   setup(props) {
-    let nextDays = toRef(props, 'nextDays');
+    let cityData = toRef(props, 'cityData');
+
+    let nextDays = computed(() => {
+      let timezoneOffset = cityData.value.timezone_offset;
+
+      cityData.value.daily.forEach(element => {
+        let weatherCode = element.weather[0].id;
+        let sunriseTime = element.sunrise + timezoneOffset;
+        let sunsetTime = element.sunset + timezoneOffset;
+        let currentTime = element.dt + timezoneOffset;
+
+        element.temp.day = Math.round(element.temp.day)
+        element.temp.night = Math.round(element.temp.night)
+        element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
+        element.weatherIcon = getWeatherIcon(false, weatherCode, sunsetTime, currentTime, sunriseTime);
+      });
+      
+      return cityData.value.daily.slice(1, 7)
+    });
 
     return {
-      nextDays, env
+      cityData, env, nextDays
     }
   }
 }
