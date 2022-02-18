@@ -21,9 +21,18 @@ export default {
   setup(props) {
     let cityData = toRef(props, 'cityData');
 
-    let chartTemperatures = computed(() => cityData.value.daily.map(a => Math.round(a.temp.day)).slice(1, 7));
+    let nextDays = computed(() => {
+      cityData.value.daily.forEach(element => {
+        element.temp.day = Math.round(element.temp.day)
+        element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
+      });
+      
+      return cityData.value.daily.slice(1, 7)
+    });
 
-    let chartDays = computed(() => cityData.value.daily.map(a => new Date(a.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })).slice(1, 7));
+    let chartTemperatures = computed(() => nextDays.value.map(a => a.temp.day));
+
+    let chartDays = computed(() => nextDays.value.map(a => a.dayname));
 
     let optionsChart = ref({
       responsive: true,
