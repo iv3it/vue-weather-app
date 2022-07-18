@@ -3,7 +3,8 @@
 </template>
 
 <script>
-import { ref, computed, toRef } from 'vue'
+import { ref, computed } from 'vue'
+import { store } from '../store/store.js'
 
 import { LineChart } from 'vue-chart-3'
 import { Chart, registerables } from 'chart.js'
@@ -15,24 +16,10 @@ export default {
   components: {
     LineChart,
   },
-  props: {
-    cityData: Object,
-  },
-  setup(props) {
-    let cityData = toRef(props, 'cityData');
+  setup() {    
+    let chartTemperatures = computed(() => store.nextDays.map(a => a.temp.day));
 
-    let nextDays = computed(() => {
-      cityData.value.daily.forEach(element => {
-        element.temp.day = Math.round(element.temp.day)
-        element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
-      });
-      
-      return cityData.value.daily.slice(1, 7)
-    });
-
-    let chartTemperatures = computed(() => nextDays.value.map(a => a.temp.day));
-
-    let chartDays = computed(() => nextDays.value.map(a => a.dayname));
+    let chartDays = computed(() => store.nextDays.map(a => a.dayname));
 
     let optionsChart = ref({
       responsive: true,

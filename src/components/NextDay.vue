@@ -1,5 +1,5 @@
 <template>
-  <div class="col-sm-3 col-4" v-for="(nextDay, index) in nextDays" :key="index">
+  <div class="col-sm-3 col-4" v-for="(nextDay, index) in store.nextDays" :key="index">
     <div class="box">
       <p class="box__day">{{ nextDay.dayname }}</p>
       <img :src="`${env.publicPath}assets/icons/${nextDay.weatherIcon}.svg`" class="box__icon"/>
@@ -10,37 +10,14 @@
 
 <script>
 import env from '../env.js'
-import { toRef, computed } from 'vue';
-import { getWeatherIcon } from '../weatherIcon'
+import { store } from '../store/store.js'
 
 export default {
   name: 'NextDay',
-  props: {
-    cityData: Object,
-  },
-  setup(props) {
-    let cityData = toRef(props, 'cityData');
-
-    let nextDays = computed(() => {
-      let timezoneOffset = cityData.value.timezone_offset;
-
-      cityData.value.daily.forEach(element => {
-        let weatherCode = element.weather[0].id;
-        let sunriseTime = element.sunrise + timezoneOffset;
-        let sunsetTime = element.sunset + timezoneOffset;
-        let currentTime = element.dt + timezoneOffset;
-
-        element.temp.day = Math.round(element.temp.day)
-        element.temp.night = Math.round(element.temp.night)
-        element.dayname = new Date(element.dt * 1000).toLocaleString('en-us', {  weekday: 'short' })
-        element.weatherIcon = getWeatherIcon(false, weatherCode, sunsetTime, currentTime, sunriseTime);
-      });
-      
-      return cityData.value.daily.slice(1, 7)
-    });
+  setup() {
 
     return {
-      cityData, env, nextDays
+      env, store
     }
   }
 }

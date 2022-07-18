@@ -3,18 +3,19 @@
     <div class="wrapper__inner">
       
       <section>
-        <form class="searchBar" @submit.prevent="findCities">
+        <form class="searchBar" @submit.prevent="searchForCities">
           <div class="position-relative flex-grow-1">
-            <input class="searchBar__input" type="text" placeholder="Szukaj..." v-model="city.name" @keyup="findCities">
-            <div class="autocomplete" v-if="citiesFound && isVisible">
+            <input class="searchBar__input" type="text" placeholder="Szukaj..." v-model="searchCity.name" @keyup="searchForCities">
+            <div class="autocomplete" v-if="store.citiesFound && isVisible">
               <ul class="autocomplete__ul">
-                <li v-for="(city, index) in citiesFound" :key="index" @click="getCityData(city)">
+                <li v-for="(city, index) in store.citiesFound" :key="index" @click="chooseCity(city)">
                   {{ city.name }},
                   <span class="autocomplete__ul--grey">
                     {{ city.country }}, {{ city.state }}
                   </span>
                 </li>
               </ul>
+              <span class="no-results" v-if="searchCity.name.length >= 3 && store.citiesFound.length < 1">No results found.</span>
             </div>
           </div>
           <button class="searchBar__search" type="submit">
@@ -24,32 +25,32 @@
       </section>
 
       <transition name="fade" appear>
-        <section class="main" v-if="cityData">
+        <section class="main" v-if="store.city">
           <h1 class="main__city">{{ cityName }}</h1>
-          <h2 class="main__condition">{{ cityData.current.weather[0].main }}</h2>
-          <img :src="`${env.publicPath}assets/icons/${cityData.weatherIcon}.svg`" class="main__icon"/>
-          <h3 class="main__temp">{{ currentTemp }}&#176;</h3>
+          <h2 class="main__condition">{{ store.city.current.weather[0].main }}</h2>
+          <img :src="`${env.publicPath}assets/icons/${store.weatherIcon}.svg`" class="main__icon"/>
+          <h3 class="main__temp">{{ store.city.current.temp }}&#176;</h3>
           <p class="main__additional">
             <span class="pe-3">
               <img :src="`${env.publicPath}assets/icons/drop-humidity.svg`" class="main__icon--xs"/>
-              {{ cityData.current.humidity }} %
+              {{ store.city.current.humidity }} %
             </span>
             <span>
               <img :src="`${env.publicPath}assets/icons/wind.svg`" class="main__icon--xs"/>
-              {{ currentWindSpeed }} km/h
+              {{ store.city.current.wind_speed }} km/h
             </span>
           </p>
         </section>
       </transition>
 
       <transition name="fade" appear>
-        <section class="nextDays" v-if="cityData">
+        <section class="nextDays" v-if="store.city">
           <h4 class="nextDays__title">Next days</h4>
           <div class="nextDays__holder">
-            <TemperatureChart :cityData="cityData"/>
+            <TemperatureChart />
             <div class="nextDays__container container">
               <div class="row flex-nowrap">
-                <NextDay :cityData="cityData"/>
+                <NextDay />
               </div>
             </div>
           </div>
@@ -62,10 +63,12 @@
 
 <script>
 import env from '../env.js'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import NextDay from '../components/NextDay.vue'
 import TemperatureChart from '../components/TemperatureChart.vue'
-import { getWeatherIcon } from '../weatherIcon'
+import findCities from '../composables/findCities'
+import loadCityData from '../composables/loadCityData'
+import { store } from '../store/store.js'
 
 export default {
   name: 'Home',
@@ -74,20 +77,16 @@ export default {
     TemperatureChart
   },
   setup() {
-    let city = {
+    let searchCity = {
       name: "", 
     }
+    let cityName = ref();
     let isVisible = ref(false);
 
-    let citiesFound = ref();
-    function findCities() {
-      if(city.name.length >= 3) {
+    function searchForCities() {
+      if(searchCity.name.length >= 3) {
         setTimeout(() => {
-          fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city.name}&limit=8&appid=${env.apiKey}`)
-          .then(response => response.json())
-          .then(data => {
-            citiesFound.value = data;
-          })
+          findCities(searchCity.name);
         }, 500);
 
         isVisible.value = true;
@@ -96,33 +95,14 @@ export default {
       }
     }
 
-    let cityName = ref();
-    let cityData = ref();
-    async function getCityData(city) {
-      let cityLat = city.lat;
-      let cityLon = city.lon;
-      cityName.value = city.name;
-
-      await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${cityLat}&lon=${cityLon}&units=metric&appid=${env.apiKey}`)
-      .then(response => response.json())
-      .then(data => cityData.value = data);
-
-      let weatherCode = cityData.value.current.weather[0].id;
-      let timezoneOffset = cityData.value.timezone_offset;
-      let sunriseTime = cityData.value.current.sunrise + timezoneOffset;
-      let sunsetTime = cityData.value.current.sunset + timezoneOffset;
-      let currentTime = cityData.value.current.dt + timezoneOffset;
-      
-      cityData.value.weatherIcon = getWeatherIcon(true, weatherCode, sunsetTime, currentTime, sunriseTime);
-
+    function chooseCity(chosenCity) {
+      loadCityData(chosenCity);
+      cityName.value = chosenCity.name;
       isVisible.value = false;
     }
-
-    let currentTemp = computed(() => Math.round(cityData.value.current.temp));
-    let currentWindSpeed = computed(() => Math.round(cityData.value.current.wind_speed * 3.6));
     
     return {
-      city, findCities, citiesFound, getCityData, cityData, isVisible, cityName, currentTemp, currentWindSpeed, env,
+      store, searchForCities, chooseCity, searchCity, isVisible, env, cityName
     }
   }
 }
@@ -220,6 +200,18 @@ export default {
       color: $grey;
     }
   }
+
+  .no-results {
+    display: block;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+.error {
+  display: block;
+  color: $white;
+  font-size: 0.75rem;
 }
 
 .main {
